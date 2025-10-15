@@ -1,8 +1,8 @@
 import db from "#db/client";
 
-import { createTrack } from "#db/queries/tracks.js";
-import { createPlaylist } from "#db/queries/playlists.js";
-import { createPlaylistsTracks } from "#db/queries/playlists_tracks.js";
+import { createTrack } from "#db/queries/tracks";
+import { createPlaylist } from "#db/queries/playlists";
+import { createPlaylistsTracks } from "#db/queries/playlists_tracks";
 
 await db.connect();
 await seed();
@@ -21,9 +21,18 @@ async function seed() {
     await createPlaylist("Playlist " + i, "Description " + ((i % 2) + 1));
   }
 
-  for (let i = 1; i <= 15; i++) {
+  const usedCombinations = new Set();
+  let created = 0;
+
+  while (created < 15) {
     const trackId = 1 + Math.floor(Math.random() * 20);
     const playlistId = 1 + Math.floor(Math.random() * 10);
-    await createPlaylistsTracks(trackId, playlistId);
+    const combination = `${playlistId}-${trackId}`;
+
+    if (!usedCombinations.has(combination)) {
+      await createPlaylistsTracks(trackId, playlistId);
+      usedCombinations.add(combination);
+      created++;
+    }
   }
 }

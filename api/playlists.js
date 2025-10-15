@@ -6,9 +6,21 @@ import {
   createPlaylist,
   getPlaylistById,
   getPlaylists,
-} from "#db/queries/playlists";
-import { getTracksByPlaylistId } from "#db/queries/tracks";
-import { createPlaylistsTracks } from "#db/queries/playlists_tracks";
+} from "../db/queries/playlists.js";
+import { getTracksByPlaylistId } from "../db/queries/tracks.js";
+import { createPlaylistsTracks } from "../db/queries/playlists_tracks.js";
+
+router.param("id", async (req, res, next, id) => {
+  if (isNaN(parseInt(id))) {
+    return res.status(400).send("ID must be a number.");
+  }
+
+  const playlist = await getPlaylistById(id);
+  if (!playlist) return res.status(404).send("Playlist not found.");
+
+  req.playlist = playlist;
+  next();
+});
 
 router.route("/").get(async (req, res) => {
   const playlists = await getPlaylists();
@@ -27,23 +39,6 @@ router.route("/").post(async (req, res) => {
   res.status(201).send(playlist);
 });
 
-router.param("id", async (req, res, next, id) => {
-  const playlist = await getPlaylistById(id);
-  if (!playlist) return res.status(404).send("Playlist not found.");
-
-  req.playlist = playlist;
-  next();
-});
-
-router.route("/:id").get((req, res) => {
-  res.send(req.playlist);
-});
-
-router.route("/:id/tracks").get(async (req, res) => {
-  const tracks = await getTracksByPlaylistId(req.playlist.id);
-  res.send(tracks);
-});
-
 router.route("/:id/tracks").post(async (req, res) => {
   if (!req.body) return res.status(400).send("missing required text");
 
@@ -54,4 +49,13 @@ router.route("/:id/tracks").post(async (req, res) => {
 
   const playlist_track = await createPlaylistsTracks(trackId, req.playlist.id);
   res.status(201).send(playlist_track);
+});
+
+router.route("/:id").get((req, res) => {
+  res.send(req.playlist);
+});
+
+router.route("/:id/tracks").get(async (req, res) => {
+  const tracks = await getTracksByPlaylistId(req.playlist.id);
+  res.send(tracks);
 });

@@ -2,7 +2,7 @@ import express from "express";
 const router = express.Router();
 export default router;
 
-import { getTracks, getTrackById } from "#db/queries/tracks.js";
+import { getTracks, getTrackById } from "../db/queries/tracks.js";
 
 router.route("/").get(async (req, res) => {
   try {
@@ -16,6 +16,10 @@ router.route("/").get(async (req, res) => {
 
 router.route("/:id").get(async (req, res) => {
   try {
+    if (isNaN(parseInt(req.params.id))) {
+      return res.status(400).send("ID must be a number.");
+    }
+
     const track = await getTrackById(req.params.id);
     if (!track) {
       return res.status(404).json({ error: "Track not found." });
