@@ -16,15 +16,19 @@ app.use("/playlists", playlistsRouter);
 app.use("/tracks", tracksRouter);
 
 app.use((error, req, res, next) => {
-  if (error.code === "23502") {
+  if (error.code === "23503") {
     return res.status(400).send(error.detail);
   }
 
-  if (err.code === "23505") {
+  if (error.code === "22P02") {
+    return res.status(400).send(error.message);
+  }
+
+  if (error.code === "23505") {
     return res.status(400).send("Track is already in this playlist.");
   }
 
-  next(err);
+  next(error);
 });
 
 app.use((error, req, res, next) => {

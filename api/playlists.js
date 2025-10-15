@@ -39,6 +39,15 @@ router.route("/").post(async (req, res) => {
   res.status(201).send(playlist);
 });
 
+router.route("/:id").get((req, res) => {
+  res.send(req.playlist);
+});
+
+router.route("/:id/tracks").get(async (req, res) => {
+  const tracks = await getTracksByPlaylistId(req.playlist.id);
+  res.send(tracks);
+});
+
 router.route("/:id/tracks").post(async (req, res) => {
   if (!req.body) return res.status(400).send("missing required text");
 
@@ -49,13 +58,4 @@ router.route("/:id/tracks").post(async (req, res) => {
 
   const playlist_track = await createPlaylistsTracks(trackId, req.playlist.id);
   res.status(201).send(playlist_track);
-});
-
-router.route("/:id").get((req, res) => {
-  res.send(req.playlist);
-});
-
-router.route("/:id/tracks").get(async (req, res) => {
-  const tracks = await getTracksByPlaylistId(req.playlist.id);
-  res.send(tracks);
 });
